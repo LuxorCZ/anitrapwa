@@ -7,6 +7,21 @@ const functions = {
   },
   getTrackedObjectSpecies: function (string) {
     return string;
+  },
+  getTrackedObjectName: function (data) {
+    if (!data) {
+      return '';
+    }
+
+    if (data.TrackedObjectName) {
+      return data.TrackedObjectName;
+    }
+
+    if (data.TrackedObjectCode) {
+      return data.TrackedObjectCode;
+    }
+
+    return '';
   }
 };
 

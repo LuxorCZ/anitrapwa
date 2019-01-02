@@ -1,5 +1,5 @@
 <template>
-    <v-ons-list-item tappable modifier="longdivider">
+    <v-ons-list-item tappable modifier="longdivider" @click="navigate">
         <div class="left">
           <v-ons-icon icon="fa-paw" class="list-item__icon"></v-ons-icon>
         </div>
@@ -19,7 +19,7 @@
 import trackedObjectUtils from '@/helpers/trackedObjects.js';
 export default {
   name: 'TrackedObjectListDetail',
-  props: ['data'],
+  props: ['data', 'toId'],
   computed: {
     name: function () {
       if (!this.data.TrackedObjectName) {
@@ -35,6 +35,11 @@ export default {
     },
     species: function () {
       return trackedObjectUtils.getTrackedObjectSpecies(this.data.SpeciesName_English);
+    }
+  },
+  methods: {
+    navigate: function () {
+      this.$router.push('/to/detail/' + this.toId);
     }
   }
 };

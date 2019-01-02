@@ -4,6 +4,7 @@ import Sign from '@/components/presenters/Sign/Sign';
 import Default from '@/components/presenters/Default/Default';
 import Home from '@/components/presenters/Home/Home';
 import TrackedObjectList from '@/components/presenters/TrackedObjects/List';
+import TrackedObjectDetail from '@/components/presenters/TrackedObjects/Detail';
 
 Vue.use(Router);
 
@@ -30,7 +31,15 @@ export default new Router({
           path: '/to',
           name: 'to',
           component: TrackedObjectList,
-          beforeEnter: authorization
+          beforeEnter: authorization,
+          children: [
+            {
+              path: '/to/detail/:id',
+              name: 'to-detail',
+              component: TrackedObjectDetail,
+              beforeEnter: authorization
+            }
+          ]
         }
       ]
     },

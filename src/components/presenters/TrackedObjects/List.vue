@@ -1,10 +1,10 @@
 <template>
     <v-ons-page>
         <v-ons-toolbar>
-        <div class="left">
-            <v-ons-back-button>Back</v-ons-back-button>
-        </div>
-        <div class="center">Anitra</div>
+          <div class="left">
+              <v-ons-back-button>Back</v-ons-back-button>
+          </div>
+          <div class="center">Tracked objects</div>
         </v-ons-toolbar>
           <div>
             <v-ons-pull-hook
@@ -20,7 +20,7 @@
                 <v-ons-list-header>Search</v-ons-list-header>
                 <v-ons-list-item><v-ons-input placeholder="Search" float v-model="filterString"/></v-ons-list-item>
                 <v-ons-list-header>Tracked objects</v-ons-list-header>
-                <list-detail :key="item.TrackedObjectId" v-for="item in itemsFiltered" :data="item"/>
+                <list-detail :key="item.TrackedObjectId" v-for="item in itemsFiltered" :data="item" :to-id="item.TrackedObjectId"/>
             </v-ons-list>
         </div>
     <loading-modal ref="loadingModal"/>
@@ -93,7 +93,6 @@ export default {
       };
       store.methods.trackedObjects.getTrackedObjects(function (err, data) {
         if (err) {
-          console.log(err);
           finished();
           return;
         }

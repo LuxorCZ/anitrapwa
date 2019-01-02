@@ -6,11 +6,15 @@ import router from './router';
 import store from '@/controllers/dataStore.js';
 import 'onsenui/css/onsenui.css';
 import 'onsenui/css/onsen-css-components.css';
-
+import VueLayers from 'vuelayers';
+import 'vuelayers/lib/style.css'; // needs css-loader
 import VueOnsen from 'vue-onsenui';
 
 // (3) And plug in the bindings
 Vue.use(VueOnsen);
+Vue.use(VueLayers, {
+  dataProjection: 'EPSG:4326'
+});
 
 Vue.config.productionTip = false;
 
