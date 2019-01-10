@@ -143,6 +143,44 @@ const dataStore = {
       },
       getTrackedObject: function (id, forceReload, callback) {
         dataStore.apiActions.trackedObjects.getTrackedObject(id, callback);
+      },
+      getTrackedObjectTracks: function (id, forceReload, doStore, days, limit, callback) {
+        const key = `track-${id}-${days}-${limit}`;
+        store.storage.getItem(key, function (err, data) {
+          if (data && !err && !forceReload) {
+            callback(null, data);
+            return;
+          }
+          if (dataStore.methods.generic.isOnline()) {
+            const token = dataStore.methods.user.getToken();
+
+            const url = constants.apiUrl + '/tracked-object/last-days/' + id + '?days=' + days + '&count=' + limit;
+            console.log(url);
+
+            fetch(
+              url, {
+                method: 'GET',
+                headers: new Headers({
+                  'Authorization': token
+                })
+              }
+            ).then(function (data) {
+              if (err) {
+                callback(err, null);
+                return;
+              }
+              data.json().then(function (response) {
+                const positions = response.positions;
+                if (doStore) {
+                  store.storage.setItem(key, positions);
+                }
+                callback(null, response.positions);
+              });
+            });
+          }
+          const error = true;
+          callback(error, null);
+        });
       }
     },
     maps: {
@@ -152,24 +190,28 @@ const dataStore = {
         z = Math.abs(z);
         const key = `map-${z}-${x}-${y}`;
         store.storage.getItem(key, function (err, data) {
-          console.log(err, data);
           if (data && !err) {
             callback(null, data);
             return;
           }
-          const url = `https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v9/tiles/256/${z}/${x}/${y}@2x?access_token=pk.eyJ1IjoibHV4b3JjeiIsImEiOiJjamo4bnNyazgyb3M2M3dzMm15amthMDJuIn0.xDY8zfwOwMeR2wi3_nks_g`;
-          fetch(url).then(function (response) {
-            const err = false;
-            response.blob().then(function (blob) {
-              store.storage.setItem(key, blob).then(function () {
-                console.log('stored');
+          if (dataStore.methods.generic.isOnline()) {
+            const url = `https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v9/tiles/256/${z}/${x}/${y}@2x?access_token=pk.eyJ1IjoibHV4b3JjeiIsImEiOiJjamo4bnNyazgyb3M2M3dzMm15amthMDJuIn0.xDY8zfwOwMeR2wi3_nks_g`;
+            fetch(url).then(function (response) {
+              const err = false;
+              response.blob().then(function (blob) {
+                store.storage.setItem(key, blob).then(function () {
+                  console.log('stored');
+                });
+                callback(err, blob);
               });
-              callback(err, blob);
+            }).catch(function (response) {
+              const err = true;
+              callback(err, null);
             });
-          }).catch(function (response) {
+          } else {
             const err = true;
             callback(err, null);
-          });
+          }
         });
       }
     }
