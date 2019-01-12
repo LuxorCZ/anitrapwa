@@ -21,6 +21,9 @@ const dataStore = {
             dataStore.methods.user.setToken(result.API_KEY);
             callback(null, that.MESSAGE);
           });
+        }).catch(function (data) {
+          const message = 'Unable to connect to Anitra servers.';
+          callback(message, data);
         });
       }
     },
@@ -40,8 +43,25 @@ const dataStore = {
             response.json().then(
               function (data) {
                 if (dataStore.methods.generic.isApiKeyValid(data)) {
-                  store.storage.setItem('trackedObjects', data.list);
-                  callback(null, data.list);
+                  const list = [];
+                  for (let object of data.list) {
+                    if (object) {
+                      object.hasLastData = false;
+                      object.hasRecentData = false;
+                      list[object.TrackedObjectId] = {
+                        TrackedObjectId: object.TrackedObjectId,
+                        TrackedObjectCode: object.TrackedObjectCode,
+                        TrackedObjectName: object.TrackedObjectName,
+                        IndividualSex: object.IndividualSex,
+                        CurrentAge: object.CurrentAge,
+                        SpeciesName_English: object.SpeciesName_English
+                      };
+                      store.storage.setItem('trackedObject-' + object.TrackedObjectId, object);
+                    }
+                  }
+                  let ret = list.filter(val => val);
+                  store.storage.setItem('trackedObjects', ret);
+                  callback(null, ret);
                 }
               }
             );
@@ -52,30 +72,39 @@ const dataStore = {
         }
       },
       getTrackedObject: function (id, callback) {
-        const token = dataStore.methods.user.getToken();
-        const url = constants.apiUrl + '/tracked-object/detail/' + id;
-        const callErr = function () {
-          const errMessage = 'Error fetching tracked object';
-          callback(errMessage, {});
-        };
-        fetch(
-          url, {
-            method: 'GET',
-            headers: new Headers({
-              'Authorization': token
-            })
+        store.storage.getItem('trackedObject-' + id, function (err, data) {
+          if (err) {
+            callback(err, null);
           }
-        ).then(function (response) {
-          response.json().then(function (data) {
-            if (dataStore.methods.generic.isApiKeyValid(data)) {
-              store.storage.setItem('trackedObject-' + id, data.trackedobject);
-              callback(null, data.trackedobject);
+          if (data) {
+            callback(null, data);
+            return;
+          }
+          const token = dataStore.methods.user.getToken();
+          const url = constants.apiUrl + '/tracked-object/detail/' + id;
+          const callErr = function () {
+            const errMessage = 'Error fetching tracked object';
+            callback(errMessage, {});
+          };
+          fetch(
+            url, {
+              method: 'GET',
+              headers: new Headers({
+                'Authorization': token
+              })
             }
+          ).then(function (response) {
+            response.json().then(function (data) {
+              if (dataStore.methods.generic.isApiKeyValid(data)) {
+                store.storage.setItem('trackedObject-' + id, data.trackedobject);
+                callback(null, data.trackedobject);
+              }
+            }).catch(function () {
+              callErr();
+            });
           }).catch(function () {
             callErr();
           });
-        }).catch(function () {
-          callErr();
         });
       }
     }
@@ -84,7 +113,8 @@ const dataStore = {
     user: {
       token: null,
       username: null
-    }
+    },
+    notifications: []
   },
   methods: {
     user: {
@@ -105,7 +135,7 @@ const dataStore = {
         return dataStore.dataCache.user.username;
       },
       verifySignOn: function (router) {
-        if (!this.isSignedIn() && dataStore.methods.generic.isOnline()) {
+        if (!this.isSignedIn()) { //  && dataStore.methods.generic.isOnline()
           router.push('/sign');
         }
       }
@@ -115,12 +145,19 @@ const dataStore = {
         // todo add notification
         if (requestData.STATUS_CODE === 'ERROR' && requestData.MESSAGE === 'Api key is invalid.') {
           router.push('/sign');
+          dataStore.methods.generic.addNotification('You have been signed out. Please sign in again.');
           return false;
         }
         return true;
       },
       isOnline: function () {
         return navigator.onLine;
+      },
+      addNotification: function (text) {
+        dataStore.dataCache.notifications.push(text);
+      },
+      getNotification: function () {
+        return dataStore.dataCache.notifications.pop();
       }
     },
     trackedObjects: {
@@ -181,6 +218,9 @@ const dataStore = {
           const error = true;
           callback(error, null);
         });
+      },
+      saveTrackedObject: function (id, data) {
+        store.storage.setItem('trackedObject-' + id, data);
       }
     },
     maps: {

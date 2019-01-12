@@ -31,7 +31,7 @@ const functions = {
     if (!isNaN(parseInt(data))) {
       const d = new Date();
       d.setTime(data * 1000);
-      return d.getUTCDate() + '-' + d.getUTCMonth() + '-' + d.getUTCFullYear() +
+      return this.formatTimeString(d.getUTCDate()) + '-' + this.formatTimeString((d.getUTCMonth() + 1)) + '-' + d.getUTCFullYear() +
              ' ' + this.formatTimeString(d.getUTCHours()) + ':' + this.formatTimeString(d.getUTCMinutes());
     }
     return '';

@@ -1,6 +1,6 @@
 <template>
   <v-ons-page id="app">
-      <v-ons-navigator swipeable swipe-target-width="200px"
+      <v-ons-navigator swipeable swipe-target-width="30px"
         :page-stack="pageStack"
         :pop-page="goBack"
       ></v-ons-navigator>

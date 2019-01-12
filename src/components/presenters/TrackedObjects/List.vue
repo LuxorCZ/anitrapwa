@@ -84,15 +84,24 @@ export default {
     loadObjects: function (done, forceReload) {
       const that = this;
       this.$refs.loadingModal.show();
+
       if (typeof (forceReload) === 'undefined') {
         forceReload = true;
       }
+
+      if (!store.methods.generic.isOnline() && forceReload) {
+        this.$ons.notification.toast('You are offline.', { timeout: 2000 });
+        done();
+      }
+
       const finished = function () {
         done();
         that.$refs.loadingModal.hide();
       };
+
       store.methods.trackedObjects.getTrackedObjects(function (err, data) {
         if (err) {
+          that.$ons.notification.toast(err, { timeout: 2000 });
           finished();
           return;
         }

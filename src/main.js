@@ -10,7 +10,6 @@ import VueLayers from 'vuelayers';
 import 'vuelayers/lib/style.css'; // needs css-loader
 import VueOnsen from 'vue-onsenui';
 
-// (3) And plug in the bindings
 Vue.use(VueOnsen);
 Vue.use(VueLayers, {
   dataProjection: 'EPSG:4326'
@@ -19,8 +18,6 @@ Vue.use(VueLayers, {
 Vue.config.productionTip = false;
 
 router.afterEach((to, from) => {
-  console.log('from', from);
-  console.log('to', to);
   store.methods.user.verifySignOn(router);
 });
 

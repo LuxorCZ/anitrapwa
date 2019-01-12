@@ -56,6 +56,12 @@ export default {
   },
   props: {
   },
+  mounted () {
+    const msg = store.methods.generic.getNotification();
+    if (msg) {
+      this.$ons.notification.toast(msg);
+    }
+  },
   data () {
     return {
       isLoading: false,
