@@ -211,8 +211,10 @@ export default {
         that.data = data;
         that.points = [];
         const lastPoint = that.getLastPoint();
-        that.points.push(lastPoint);
-        that.center = [lastPoint.lng, lastPoint.lat];
+        if (lastPoint) {
+          that.points.push(lastPoint);
+          that.center = [lastPoint.lng, lastPoint.lat];
+        }
         that.loaded = true;
       });
     },

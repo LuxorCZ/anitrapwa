@@ -14,11 +14,12 @@ const dataStore = {
           data.json().then(function (result) {
             if (result.STATUS_CODE === 'ERROR') {
               callback(result.MESSAGE, '');
-              dataStore.dataCache.user.username = email;
-              store.init(email);
               return;
             }
+            store.init(email);
+            dataStore.dataCache.user.username = email;
             dataStore.methods.user.setToken(result.API_KEY);
+            dataStore.methods.user.setUsername(email);
             callback(null, that.MESSAGE);
           });
         }).catch(function (data) {
@@ -122,6 +123,10 @@ const dataStore = {
         dataStore.dataCache.user.token = token;
         localStorage.setItem('token', token);
       },
+      setUsername: function (username) {
+        localStorage.setItem('username', username);
+        dataStore.dataCache.user.username = username;
+      },
       getToken: function () {
         return dataStore.dataCache.user.token;
       },
@@ -132,12 +137,27 @@ const dataStore = {
         return dataStore.dataCache.user.token !== null;
       },
       getUsername: function () {
-        return dataStore.dataCache.user.username;
+        if (dataStore.dataCache.user.username) {
+          return dataStore.dataCache.user.username;
+        }
+        const username = localStorage.getItem('username');
+        dataStore.dataCache.user.username = username;
+        return username;
       },
       verifySignOn: function (router) {
         if (!this.isSignedIn()) { //  && dataStore.methods.generic.isOnline()
           router.push('/sign');
         }
+      },
+      signOut: function (callback) {
+        store.storage.clear().then(function () {
+          localStorage.removeItem('username');
+          localStorage.removeItem('token');
+          callback(null, null);
+        }).catch(function () {
+          const err = true;
+          callback(err, null);
+        });
       }
     },
     generic: {
@@ -158,6 +178,16 @@ const dataStore = {
       },
       getNotification: function () {
         return dataStore.dataCache.notifications.pop();
+      },
+      getStorageEstimate: function (callback) {
+        navigator.storage.estimate().then(function (estimate) {
+          if (!estimate) {
+            const hasError = true;
+            callback(hasError, null);
+            return;
+          }
+          callback(null, (estimate.usage / estimate.quota).toFixed(2));
+        });
       }
     },
     trackedObjects: {
@@ -188,6 +218,7 @@ const dataStore = {
             callback(null, data);
             return;
           }
+
           if (dataStore.methods.generic.isOnline()) {
             const token = dataStore.methods.user.getToken();
 
@@ -207,11 +238,13 @@ const dataStore = {
                 return;
               }
               data.json().then(function (response) {
-                const positions = response.positions;
-                if (doStore) {
-                  store.storage.setItem(key, positions);
+                if (dataStore.methods.generic.isApiKeyValid(response)) {
+                  const positions = response.positions;
+                  if (doStore) {
+                    store.storage.setItem(key, positions);
+                  }
+                  callback(null, response.positions);
                 }
-                callback(null, response.positions);
               });
             });
           }

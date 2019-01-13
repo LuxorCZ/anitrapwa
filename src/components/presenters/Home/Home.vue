@@ -4,7 +4,7 @@
       <div class="center">Anitra</div>
     </v-ons-toolbar>
     <v-ons-list>
-      <v-ons-list-header>Default</v-ons-list-header>
+      <v-ons-list-header>Navigation</v-ons-list-header>
       <v-ons-list-item tappable modifier="longdivider" @click="navigateTrackedObjects">
         <div class="left">
           <v-ons-icon icon="fa-paw" class="list-item__icon main-menu-icon-purple"></v-ons-icon>
@@ -13,7 +13,16 @@
           Tracked objects
         </div>
       </v-ons-list-item>
-      <v-ons-list-item tappable modifier="longdivider">Item B</v-ons-list-item>
+
+      <v-ons-list-item tappable modifier="longdivider" @click="navigateSettings">
+        <div class="left">
+          <v-ons-icon icon="fa-wrench" class="list-item__icon main-menu-icon-yellow"></v-ons-icon>
+        </div>
+        <div class="center">
+          Settings
+        </div>
+      </v-ons-list-item>
+
     </v-ons-list>
   </v-ons-page>
 </template>
@@ -28,6 +37,9 @@ export default {
   methods: {
     navigateTrackedObjects: function () {
       this.$router.push({ name: 'to' });
+    },
+    navigateSettings: function () {
+      this.$router.push({ name: 'settings' });
     }
   }
 };

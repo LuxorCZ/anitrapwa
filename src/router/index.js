@@ -5,6 +5,7 @@ import Default from '@/components/presenters/Default/Default';
 import Home from '@/components/presenters/Home/Home';
 import TrackedObjectList from '@/components/presenters/TrackedObjects/List';
 import TrackedObjectDetail from '@/components/presenters/TrackedObjects/Detail';
+import Settings from '@/components/presenters/Settings/Settings';
 
 Vue.use(Router);
 // beforeEnter - https://github.com/vuejs/vue-router/blob/dev/examples/auth-flow/app.js
@@ -32,6 +33,11 @@ export default new Router({
               component: TrackedObjectDetail
             }
           ]
+        },
+        {
+          path: '/settings',
+          name: 'settings',
+          component: Settings
         }
       ]
     },
