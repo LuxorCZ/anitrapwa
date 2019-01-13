@@ -44,7 +44,7 @@
 
     </v-ons-card>
 
-    <v-ons-card>
+    <v-ons-card v-if="data">
 
       <div class="title">
         Actions
