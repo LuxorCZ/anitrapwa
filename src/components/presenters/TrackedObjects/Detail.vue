@@ -9,19 +9,19 @@
 
     <v-ons-card>
 
-      <vl-map :load-tiles-while-animating="true" :load-tiles-while-interacting="true" style="height: 400px">
+      <vl-map v-if="loaded" :load-tiles-while-animating="true" :load-tiles-while-interacting="true" style="height: 400px">
           <vl-view :min-zoom="3" :center="center" :zoom="zoom"></vl-view>
           <vl-layer-tile>
             <vl-source-xyz :tileLoadFunction="tileFunction" url="https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibHV4b3JjeiIsImEiOiJjamo4bnNyazgyb3M2M3dzMm15amthMDJuIn0.xDY8zfwOwMeR2wi3_nks_g"></vl-source-xyz>
           </vl-layer-tile>
-          <vl-feature v-for="(point, index) in points" :key="point.Id" :properties="{time: point.t, isFirst: index === 0, displayLabel: displayLabels}">
+          <vl-feature  v-for="(point, index) in points" :key="point.Id" :properties="{time: point.t, isFirst: index === 0, displayLabel: displayLabels}">
             <vl-style-func :factory="styleFunction"/>
             <vl-geom-point :coordinates="[point.lng, point.lat]"></vl-geom-point>
           </vl-feature>
           <vl-feature v-if="points.length">
             <vl-geom-line-string :coordinates="getLine" />
           </vl-feature>
-          <vl-feature v-if="hasUserPosition">
+          <vl-feature v-if="isUserGpsPositionLocated">
             <vl-style-func :factory="userPointStyleFunction"/>
             <vl-geom-point :coordinates="[userGpsPosition.longitude, userGpsPosition.latitude]"></vl-geom-point>
           </vl-feature>
@@ -147,7 +147,8 @@ export default {
           return [style];
         };
       },
-      userGpsPosition: {}
+      userGpsPosition: {},
+      isUserGpsPositionLocated: false
     };
   },
   mounted () {
@@ -261,6 +262,7 @@ export default {
       }
     },
     updatePosition: function (pos) {
+      this.isUserGpsPositionLocated = true;
       this.userGpsPosition = pos.coords;
     },
     getDistanceFromLastPoint: function (pos) {
