@@ -15,7 +15,7 @@
                     <label for="username" class="mr-3"><v-ons-icon icon="fa-envelope"></v-ons-icon></label>
                 </ons-col>
                 <ons-col width="90%">
-                    <v-ons-input input-id="username" float placeholder="E-mail" type="email" v-model="username"></v-ons-input>
+                    <v-ons-input input-id ="username" float placeholder="E-mail" type="email" v-model="username" :disabled="isLoading"></v-ons-input>
                 </ons-col>
             </ons-row>
         </v-ons-list-item>
@@ -25,7 +25,7 @@
                     <label for="password" class="mr-3"><v-ons-icon icon="fa-key"></v-ons-icon></label>
                 </ons-col>
                 <ons-col width="90%">
-                    <v-ons-input input-id="password" float placeholder="Password" type="password" v-model="password"></v-ons-input>
+                    <v-ons-input input-id="password" float placeholder="Password" type="password" v-model="password" :disabled="isLoading"></v-ons-input>
                 </ons-col>
             </ons-row>
         </v-ons-list-item>

@@ -18,7 +18,7 @@
 
             <v-ons-list>
                 <v-ons-list-header>Search</v-ons-list-header>
-                <v-ons-list-item><v-ons-input placeholder="Search" float v-model="filterString"/></v-ons-list-item>
+                <v-ons-list-item><v-ons-input placeholder="Search" float v-model="filterString" :disabled="isLoading"/></v-ons-list-item>
                 <v-ons-list-header>Tracked objects</v-ons-list-header>
                 <list-detail :key="item.TrackedObjectId" v-for="item in itemsFiltered" :data="item" :to-id="item.TrackedObjectId"/>
             </v-ons-list>
@@ -45,7 +45,8 @@ export default {
       items: [],
       state: '',
       search: '',
-      searchTimeout: false
+      searchTimeout: false,
+      isLoading: false
     };
   },
   mounted () {
@@ -84,6 +85,7 @@ export default {
     loadObjects: function (done, forceReload) {
       const that = this;
       this.$refs.loadingModal.show();
+      this.isLoading = true;
 
       if (typeof (forceReload) === 'undefined') {
         forceReload = true;
@@ -91,12 +93,14 @@ export default {
 
       if (!store.methods.generic.isOnline() && forceReload) {
         this.$ons.notification.toast('You are offline.', { timeout: 2000 });
+        this.isLoading = false;
         done();
       }
 
       const finished = function () {
         done();
         that.$refs.loadingModal.hide();
+        that.isLoading = false;
       };
 
       store.methods.trackedObjects.getTrackedObjects(function (err, data) {
