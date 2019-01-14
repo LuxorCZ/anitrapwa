@@ -1,6 +1,7 @@
 import constants from '../common/constants.js';
 import store from './storage.js';
 import router from '@/router/index.js';
+import getTile from '../helpers/geo.js';
 
 const dataStore = {
   apiActions: {
@@ -286,7 +287,8 @@ const dataStore = {
             callback(err, null);
           }
         });
-      }
+      },
+      getTileCoordinates: getTile
     }
   },
   init: function () {

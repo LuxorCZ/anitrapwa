@@ -58,7 +58,7 @@
 
           <v-ons-list-header>Download</v-ons-list-header>
           <v-ons-list-item tappable @click="handleDownloadLastPositions"><v-ons-icon icon="fa-check" v-if="hasPositionsDownloaded"></v-ons-icon>Last 30 days of TO</v-ons-list-item>
-          <v-ons-list-item tappable>Map around last position</v-ons-list-item>
+          <v-ons-list-item tappable @click="handleDownloadMap">Map around last position</v-ons-list-item>
 
         </v-ons-list>
       </div>
@@ -91,6 +91,7 @@ export default {
       displayLabels: false,
       tileFunction: function (tile, src) {
         const coords = tile.getTileCoord();
+        console.log(coords[1], coords[2], coords[0]);
         store.methods.maps.getTile(coords[1], coords[2], coords[0], function (err, data) {
           if (err || typeof (data) === 'undefined') {
             tile.setState(TileState.ERROR);
@@ -258,7 +259,7 @@ export default {
     },
     getLastPoint: function () {
       if (this.data.LastPositionLongitude && this.data.LastPositionLatitude) {
-        return {lat: this.data.LastPositionLatitude, lng: this.data.LastPositionLongitude, t: this.data.LastPositionTime * 1000};
+        return {lat: this.data.LastPositionLatitude, lng: this.data.LastPositionLongitude, t: this.data.EndPositionTime * 1000};
       }
     },
     updatePosition: function (pos) {
@@ -288,6 +289,32 @@ export default {
       } else {
         this.$ons.notification.toast('You do not have this data downloaded yet!', { timeout: 2000 });
       }
+    },
+    handleDownloadMap: function () {
+      // download general map around last position
+      const lastPoint = this.getLastPoint();
+      const xSize = 4;
+      const ySize = 4;
+      const maxLevel = 18;
+      const tileSizeEstimate = 0.0384;
+      // 18 - 3 + 2*4*2*4
+      const tileCount = 15 + (2 * xSize) * (2 * ySize);
+
+      this.$ons.notification.confirm(`Are you sure you want to download ${tileCount} tiles? It may take up to ${tileCount * tileSizeEstimate} MB to download.`).then(result => {
+        if (result) {
+          for (let level = 3; level < 18; level++) {
+            const tileCoordinates = store.methods.maps.getTileCoordinates(lastPoint.lat, lastPoint.lng, level);
+            store.methods.maps.getTile(tileCoordinates.x, tileCoordinates.y, level, function () {});
+          }
+
+          const baseCoordinates = store.methods.maps.getTileCoordinates(lastPoint.lat, lastPoint.lng, maxLevel);
+          for (let x = -(xSize); x < xSize; x++) {
+            for (let y = -(ySize); y < ySize; y++) {
+              store.methods.maps.getTile(baseCoordinates.x + x, baseCoordinates.y + y, maxLevel, function () {});
+            }
+          }
+        }
+      });
     }
   }
 };
