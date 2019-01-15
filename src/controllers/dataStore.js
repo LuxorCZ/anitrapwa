@@ -56,11 +56,13 @@ const dataStore = {
                         TrackedObjectName: object.TrackedObjectName,
                         IndividualSex: object.IndividualSex,
                         CurrentAge: object.CurrentAge,
-                        SpeciesName_English: object.SpeciesName_English
+                        SpeciesName_English: object.SpeciesName_English,
+                        DeviceSerialNo: object.DeviceSerialNo
                       };
                       store.storage.setItem('trackedObject-' + object.TrackedObjectId, object);
                     }
                   }
+                  console.log(list);
                   let ret = list.filter(val => val);
                   store.storage.setItem('trackedObjects', ret);
                   callback(null, ret);

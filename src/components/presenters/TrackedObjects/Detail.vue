@@ -298,7 +298,7 @@ export default {
       const maxLevel = 18;
       const tileSizeEstimate = 0.0384;
       // 18 - 3 + 2*4*2*4
-      const tileCount = 15 + (2 * xSize) * (2 * ySize);
+      const tileCount = 15 + (2 * xSize) * (2 * ySize); // uložit do proměnné a v callbacích inkrementovat?
 
       this.$ons.notification.confirm(`Are you sure you want to download ${tileCount} tiles? It may take up to ${tileCount * tileSizeEstimate} MB to download.`).then(result => {
         if (result) {

@@ -5,17 +5,11 @@
               <v-ons-back-button>Back</v-ons-back-button>
           </div>
           <div class="center">Tracked objects</div>
+          <div class="right">
+              <v-ons-toolbar-button icon="fa-refresh" @click="reloadObjectsManually"></v-ons-toolbar-button>
+          </div>
         </v-ons-toolbar>
           <div>
-            <v-ons-pull-hook
-                :action="loadObjects"
-                @changestate="state = $event.state"
-            >
-                <span v-show="state === 'initial'"> Pull to refresh </span>
-                <span v-show="state === 'preaction'"> Release </span>
-                <span v-show="state === 'action'"> Loading... </span>
-            </v-ons-pull-hook>
-
             <v-ons-list>
                 <v-ons-list-header>Search</v-ons-list-header>
                 <v-ons-list-item><v-ons-input placeholder="Search" float v-model="filterString" :disabled="isLoading"/></v-ons-list-item>
@@ -50,9 +44,7 @@ export default {
     };
   },
   mounted () {
-    this.loadObjects(
-      function () { }, false
-    );
+    this.loadObjects(false);
   },
   computed: {
     filterString: {
@@ -68,21 +60,38 @@ export default {
     },
     itemsFiltered: function () {
       if (this.filterString !== '') {
-        const reformat = (data) => { if (data === null) return ''; return data.toLowerCase(); };
+        const reformat = (data) => {
+          if (!data) return '';
+          if (typeof data !== 'string') {
+            return '' + data;
+          }
+          return data.toLowerCase();
+        };
         this.$refs.loadingModal.show();
         let data = this.items.filter(function (x) {
           return reformat(x.TrackedObjectCode).indexOf(this.filterString) >= 0 || reformat(x.TrackedObjectName).indexOf(this.filterString) >= 0 ||
                  reformat(x.DeviceSerialNo).indexOf(this.filterString) >= 0 || reformat(x.SpeciesName_English).indexOf(this.filterString) >= 0 ||
-                 reformat(x.DeviceSerialNo).indexOf(this.IndividualSex) >= 0 || reformat(x.CurrentAge).indexOf(this.filterString) >= 0;
+                 reformat(x.IndividualSex).indexOf(this.filterString) >= 0 || reformat(x.CurrentAge).indexOf(this.filterString) >= 0;
         }.bind(this));
         this.$refs.loadingModal.hide();
         return data;
       }
       return this.items;
+    },
+    scrolledTop: function () {
+      return window.scrollY === 0;
     }
   },
   methods: {
-    loadObjects: function (done, forceReload) {
+    reloadObjectsManually: function () {
+      const that = this;
+      this.$ons.notification.confirm('Do you really want to reload all data?').then((response) => {
+        if (response) {
+          that.loadObjects(true);
+        }
+      });
+    },
+    loadObjects: function (forceReload) {
       const that = this;
       this.$refs.loadingModal.show();
       this.isLoading = true;
@@ -94,11 +103,9 @@ export default {
       if (!store.methods.generic.isOnline() && forceReload) {
         this.$ons.notification.toast('You are offline.', { timeout: 2000 });
         this.isLoading = false;
-        done();
       }
 
       const finished = function () {
-        done();
         that.$refs.loadingModal.hide();
         that.isLoading = false;
       };
