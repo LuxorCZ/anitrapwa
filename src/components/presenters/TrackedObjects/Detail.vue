@@ -221,6 +221,10 @@ export default {
       });
     },
     handleDownloadLastPositions: function () {
+      if (!store.methods.generic.isOnline()) {
+        this.$ons.notification.toast('You are offline.', { timeout: 2000 });
+        return;
+      }
       const that = this;
       store.methods.trackedObjects.getTrackedObjectTracks(this.id, true, true, constants.defaultTrackDays, constants.defaultMaxPositions, function (err, data) {
         if (err) {
@@ -244,6 +248,10 @@ export default {
       });
     },
     handleDownloadPreviewPositions: function (callback) {
+      if (!store.methods.generic.isOnline()) {
+        this.$ons.notification.toast('You are offline.', { timeout: 2000 });
+        return;
+      }
       const that = this;
       store.methods.trackedObjects.getTrackedObjectTracks(this.id, true, true, constants.defaultPreviewDays, constants.defaultPreviewPositions, function (err, data) {
         if (err) {
@@ -283,7 +291,6 @@ export default {
       this.displayLabels = !this.displayLabels;
     },
     displayLastThirtyDays: function () {
-      console.log(this.data);
       if (this.data.lastPoints) {
         this.points = this.data.lastPoints;
       } else {
@@ -291,6 +298,10 @@ export default {
       }
     },
     handleDownloadMap: function () {
+      if (!store.methods.generic.isOnline()) {
+        this.$ons.notification.toast('You are offline.', { timeout: 2000 });
+        return;
+      }
       // download general map around last position
       const lastPoint = this.getLastPoint();
       const xSize = 4;
@@ -299,18 +310,18 @@ export default {
       const tileSizeEstimate = 0.0384;
       // 18 - 3 + 2*4*2*4
       const tileCount = 15 + (2 * xSize) * (2 * ySize); // uložit do proměnné a v callbacích inkrementovat?
-
+      let downloadedTiles = 0;
       this.$ons.notification.confirm(`Are you sure you want to download ${tileCount} tiles? It may take up to ${tileCount * tileSizeEstimate} MB to download.`).then(result => {
         if (result) {
           for (let level = 3; level < 18; level++) {
             const tileCoordinates = store.methods.maps.getTileCoordinates(lastPoint.lat, lastPoint.lng, level);
-            store.methods.maps.getTile(tileCoordinates.x, tileCoordinates.y, level, function () {});
+            store.methods.maps.getTile(tileCoordinates.x, tileCoordinates.y + 1, level, function () {});
           }
 
           const baseCoordinates = store.methods.maps.getTileCoordinates(lastPoint.lat, lastPoint.lng, maxLevel);
           for (let x = -(xSize); x < xSize; x++) {
             for (let y = -(ySize); y < ySize; y++) {
-              store.methods.maps.getTile(baseCoordinates.x + x, baseCoordinates.y + y, maxLevel, function () {});
+              store.methods.maps.getTile(baseCoordinates.x + x, baseCoordinates.y + y + 1, maxLevel, function () { downloadedTiles++; console.log(downloadedTiles / tileCount); });
             }
           }
         }

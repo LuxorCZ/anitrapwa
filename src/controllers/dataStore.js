@@ -62,7 +62,6 @@ const dataStore = {
                       store.storage.setItem('trackedObject-' + object.TrackedObjectId, object);
                     }
                   }
-                  console.log(list);
                   let ret = list.filter(val => val);
                   store.storage.setItem('trackedObjects', ret);
                   callback(null, ret);
@@ -226,7 +225,6 @@ const dataStore = {
             const token = dataStore.methods.user.getToken();
 
             const url = constants.apiUrl + '/tracked-object/last-days/' + id + '?days=' + days + '&count=' + limit;
-            console.log(url);
 
             fetch(
               url, {
