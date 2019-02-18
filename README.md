@@ -1,6 +1,6 @@
 # anitra
 
-> Anitra field application
+> Anitra field application. Probably best to not look at the sources.
 
 ## Build Setup
 
